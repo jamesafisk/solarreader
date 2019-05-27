@@ -14,25 +14,27 @@ boxrect = box.get_rect()
 class WeatherServer(threading.Thread):
         temp = 0
         def run(self):
-                while running:
-                        url = "http://api.openweathermap.org/data/2.5/weather?q=stafford,uk&units=metric&APPID=9e0c2dc0b19e2e83e58cecc273d68cea"
-                        print("{} started!".format(self.getName()))              # "Thread-x started!"
-                        print("Getting temp")              # "Thread-x started!"
-                        r = requests.get(url)
-                        weatherData = r.json()
-                        self.temp = weatherData["main"]["temp"]
+                url = "http://api.openweathermap.org/data/2.5/weather?q=stafford,uk&units=metric&APPID=9e0c2dc0b19e2e83e58cecc273d68cea"
+                print("{} started!".format(self.getName()))              # "Thread-x started!"
+                print("Getting temp")              # "Thread-x started!"
+                r = requests.get(url)
+                weatherData = r.json()
+                self.temp = weatherData["main"]["temp"]
 
-                        print ("The current temp is {}".format(weatherData["main"]["temp"]))
+                print ("The current temp is {}".format(weatherData["main"]["temp"]))
 
 def main():
 
         mythread = WeatherServer(name = "Thread-Weather getter")  # ...Instantiate a thread and pass a unique ID to it
-        temp = 0
+        mythread.start()
+
+        temp = 16
         showstatus = True
         startTimeForStatus = time.time()
         startTimeForTempUpdate = time.time()
         pygame.font.init()
-        font = pygame.font.Font('freesansbold.ttf', 32)
+        font = pygame.font.SysFont("comicsansms", 24)
+        clock = pygame.time.Clock()
 
         # set the center of the rectangular object. 
         while running:
@@ -49,9 +51,9 @@ def main():
                         startTimeForTempUpdate = time.time()
                         mythread.start()
                 temp = mythread.temp
-                text = font.render(str(decimal.Decimal(temp)), True, (255, 255, 255), (0,0,0)) 
-                textRect = text.get_rect()
-                textRect.center = (-150, -150)
-
+                stringtooutput = str(int(temp)) + '\u00b0'
+                text = font.render(stringtooutput, True, (255, 255, 255), (0,0,0)) 
+                screen.blit(text,(435,5))
                 pygame.display.flip()
+                clock.tick(60)
 if __name__ == '__main__':main()
