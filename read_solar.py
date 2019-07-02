@@ -40,14 +40,10 @@
 ###################################################################################################
  
 import socket, binascii, datetime
-from mysql.connector import (connection)
 
 # change these values to suit your requirements:- 
 HOST = ''                                 # Hostname or ip address of interface, leave blank for all
-PORT = 56743                              # listening on port 9999
-logfile = 'ginlong.log'                    # location of output log file
-webfile = 'ginlong.status'                # location of web file
- 
+PORT = 56743                              # listening on port 9999 
 
 # inverter values found (so far) all big endian 16 bit unsigned:-
 header = '685951b0'                     # hex stream header
@@ -70,7 +66,6 @@ inverter_lmth = 91                    # offset 91 & 92 total kWh for last month
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)   # create socket on required port
 sock.bind((HOST, PORT))
 
-
 while True:        # loop forever
     sock.listen(1)                            # listen on port
     conn, addr = sock.accept()                # wait for inverter connection
@@ -78,26 +73,8 @@ while True:        # loop forever
     hexdata = binascii.hexlify(rawdata)        # convert data to hex
 
     if(hexdata[0:8] == header and len(hexdata) == data_size):        # check for valid data
-	todaydate = datetime.datetime.now()
-        cnx = connection.MySQLConnection(user='solaruser', password='jam40960',
-                              host='192.168.0.40',
-                              database='mysql')
-        cursor = cnx.cursor()
-        
-        add_solar = ("INSERT INTO solar_readings "
-               "(date_of_reading, wattage) "
-               "VALUES (%s, %s)")
-        
+        todaydate = datetime.datetime.now()
         watt_now = str(int(hexdata[inverter_now*2:inverter_now*2+4],16))
-        
-        data_solar = (todaydate, watt_now)
-        
-        cursor.execute(add_solar, data_solar)
-        
-        cnx.commit()
-        
-        cursor.close()
-        cnx.close()
         # extract main values and convert to decimal
         # generating power in watts
         kwh_day = str(float(int(hexdata[inverter_day*2:inverter_day*2+4],16))/100)    # running total kwh for day
@@ -118,16 +95,5 @@ while True:        # loop forever
         kwh_yesterday = str(float(int(hexdata[inverter_yes*2:inverter_yes*2+4],16))/100)    # yesterday's kwh
         kwh_month = str(int(hexdata[inverter_mth*2:inverter_mth*2+4],16))                    # running total kwh for month
         kwh_lastmonth = str(int(hexdata[inverter_lmth*2:inverter_lmth*2+4],16))                # running total kwh for last month
-
-
-        timestamp = datetime.datetime.now().strftime("%I:%M%p on %B %d, %Y")
-  
-#        log = open(logfile,'a')        # write data to logfile, main values only
-##        log.write(timestamp + ' ' + watt_now + ' ' + kwh_day + ' ' + kwh_total + '\n')
-#        log.close()
-
-#        web = open(webfile,'w')        # output all values, possibly for webpage
-#        web.write(timestamp + ' ' + watt_now + ' ' + kwh_day + ' ' + kwh_total + ' ' + dc_volts1 + ' ' + dc_amps1 + ' ' + dc_volts2 + ' ' + dc_amps2 + ' ' + ac_volts + ' ' + ac_amps + ' ' + ac_freq + ' ' + kwh_yesterday + ' ' + kwh_month + ' ' + kwh_lastmonth + ' ' + temp + '\n')
-#        web.close()
 
 
