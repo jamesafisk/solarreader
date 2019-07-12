@@ -1,7 +1,7 @@
 import sys
 import threading
 import time
-import pygame
+import pygame as pg
 import requests
 import decimal
 import socket, binascii, datetime
@@ -10,8 +10,8 @@ import logging
 running = 1
 black = 0, 0, 0
 size = width, height = 480, 320
-screen = pygame.display.set_mode(size)
-box = pygame.image.load("whitebox.png")
+screen = pg.display.set_mode(size)
+box = pg.image.load("whitebox.png")
 boxrect = box.get_rect()
 
 HOST = ''                                 # Hostname or ip address of interface, leave blank for all
@@ -29,34 +29,41 @@ class WeatherServer(threading.Thread):
 
 
 class InverterCallBack(threading.Thread):
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)   # create socket on required port
-        sock.bind((HOST, PORT))
+        def run(self):
+                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)   # create socket on required port
+                sock.bind((HOST, PORT))
 
-        while True:        # loop forever
-                sock.listen(1)                            # listen on port
-                conn, addr = sock.accept()                # wait for inverter connection
-                rawdata = conn.recv(1000)                # read incoming data
-                hexdata = binascii.hexlify(rawdata)        # convert data to hex
-                logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
-                logging.debug('Current data is : ' + hexdata)
+                while True:        # loop forever
+                        sock.listen(1)                            # listen on port
+                        conn, addr = sock.accept()                # wait for inverter connection
+                        rawdata = conn.recv(1000)                # read incoming data
+                        hexdata = binascii.hexlify(rawdata)        # convert data to hex
+                        logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+                        logging.debug('Current data is : ' + str(hexdata))
 
 def main():
 
         mythread = WeatherServer(name = "Thread-Weather getter")  # ...Instantiate a thread and pass a unique ID to it
         mythread.start()
 
-        inverterThread = InverterCallBack(name = "Inverter thread")
+        inverterThread = InverterCallBack(name = "inverter comms")
+        inverterThread.start()
 
         temp = 16
         showstatus = True
         startTimeForStatus = time.time()
         startTimeForTempUpdate = time.time()
-        pygame.font.init()
-        font = pygame.font.SysFont("comicsansms", 24)
-        clock = pygame.time.Clock()
+        pg.font.init()
+        font = pg.font.SysFont("comicsansms", 24)
+        clock = pg.time.Clock()
 
         # set the center of the rectangular object. 
         while running:
+                for event in pg.event.get():
+                        if event.type == pg.MOUSEBUTTONUP:
+                                None 
+                        if event.type == 
+
                 screen.fill(black)
                 if (showstatus):
                         screen.blit(box, boxrect)
@@ -74,6 +81,7 @@ def main():
                 stringtooutput = str(int(temp)) + '\u00b0'
                 text = font.render(stringtooutput, True, (255, 255, 255), (0,0,0)) 
                 screen.blit(text,(435,5))
-                pygame.display.flip()
+                pg.display.flip()
                 clock.tick(60)
+
 if __name__ == '__main__':main()
