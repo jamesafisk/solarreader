@@ -6,6 +6,8 @@ import requests
 import decimal
 import socket, binascii, datetime
 import logging
+import WeatherServer
+import read_solar
 
 running = 1
 black = 0, 0, 0
@@ -14,42 +16,15 @@ screen = pg.display.set_mode(size)
 box = pg.image.load("whitebox.png")
 boxrect = box.get_rect()
 
-HOST = ''                                 # Hostname or ip address of interface, leave blank for all
-PORT = 56743                              # listening on port 9999 
-
-class WeatherServer(threading.Thread):
-        temp = 0
-        def run(self):
-                url = "http://api.openweathermap.org/data/2.5/weather?q=stafford,uk&units=metric&APPID=9e0c2dc0b19e2e83e58cecc273d68cea"
-                print("{} started!".format(self.getName()))              # "Thread-x started!"
-                print("Getting temp")              # "Thread-x started!"
-                r = requests.get(url)
-                weatherData = r.json()
-                self.temp = weatherData["main"]["temp"]
-
-
-class InverterCallBack(threading.Thread):
-        def run(self):
-                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)   # create socket on required port
-                sock.bind((HOST, PORT))
-
-                while True:        # loop forever
-                        sock.listen(1)                            # listen on port
-                        conn, addr = sock.accept()                # wait for inverter connection
-                        rawdata = conn.recv(1000)                # read incoming data
-                        hexdata = binascii.hexlify(rawdata)        # convert data to hex
-                        logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
-                        logging.debug('Current data is : ' + str(hexdata))
-
 def main():
 
-        mythread = WeatherServer(name = "Thread-Weather getter")  # ...Instantiate a thread and pass a unique ID to it
+        mythread = WeatherServer.WeatherServer(name = "Thread-Weather getter")  # ...Instantiate a thread and pass a unique ID to it
         mythread.start()
 
-        inverterThread = InverterCallBack(name = "inverter comms")
+        inverterThread = read_solar.InverterCallBack(name = "inverter comms")
         inverterThread.start()
 
-        temp = 16
+        temp = 0
         showstatus = True
         startTimeForStatus = time.time()
         startTimeForTempUpdate = time.time()
@@ -61,8 +36,7 @@ def main():
         while running:
                 for event in pg.event.get():
                         if event.type == pg.MOUSEBUTTONUP:
-                                None 
-                        if event.type == 
+                                None
 
                 screen.fill(black)
                 if (showstatus):
@@ -76,7 +50,7 @@ def main():
                 if (elapsedTimeForTemp > 3600):
                         startTimeForTempUpdate = time.time()
                         mythread.start()
-                        InverterCallBack
+                        
                 temp = mythread.temp
                 stringtooutput = str(int(temp)) + '\u00b0'
                 text = font.render(stringtooutput, True, (255, 255, 255), (0,0,0)) 
