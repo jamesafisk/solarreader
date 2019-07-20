@@ -29,7 +29,7 @@ def main():
         startTimeForStatus = time.time()
         startTimeForTempUpdate = time.time()
         pg.font.init()
-        font = pg.font.SysFont("comicsansms", 24)
+        font = pg.font.SysFont("comicsansms", 32)
         clock = pg.time.Clock()
 
         # set the center of the rectangular object. 
@@ -52,9 +52,9 @@ def main():
                         mythread.start()
                         
                 temp = mythread.temp
-                stringtooutput = str(int(temp)) + '\u00b0'
+                stringtooutput = str(int(temp)) + '\u2103'
                 text = font.render(stringtooutput, True, (255, 255, 255), (0,0,0)) 
-                screen.blit(text,(435,5))
+                screen.blit(text,(430,5))
                 pg.display.flip()
                 clock.tick(60)
 
