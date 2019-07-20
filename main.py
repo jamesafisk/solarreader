@@ -53,6 +53,7 @@ def main():
                         
                 temp = mythread.temp
                 stringtooutput = str(int(temp)) + '\u2103'
+                        
                 text = font.render(stringtooutput, True, (255, 255, 255), (0,0,0)) 
                 screen.blit(text,(430,5))
                 pg.display.flip()
