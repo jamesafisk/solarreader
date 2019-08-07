@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import sys
 import threading
 import time
@@ -8,11 +10,12 @@ import socket, binascii, datetime
 import logging
 import WeatherServer
 import read_solar
+from datetime import datetime
 
 running = 1
 black = 0, 0, 0
 size = width, height = 480, 320
-screen = pg.display.set_mode(size)
+screen = pg.display.set_mode(size, pg.FULLSCREEN | pg.DOUBLEBUF, 32, 0)
 box = pg.image.load("whitebox.png")
 boxrect = box.get_rect()
 
@@ -52,10 +55,15 @@ def main():
                         mythread.start()
                         
                 temp = mythread.temp
-                stringtooutput = str(int(temp)) + '\u2103'
+                stringtooutput = str(int(temp)) + u'\N{DEGREE SIGN}'
                         
                 text = font.render(stringtooutput, True, (255, 255, 255), (0,0,0)) 
-                screen.blit(text,(430,5))
+                screen.blit(text,(430,270))
+                
+                now = datetime.now()
+                timeoutput = font.render(now.strftime("%H:%M:%S"), True, (255, 255, 255), (0,0,0))
+                screen.blit(timeoutput, (330, 5))
+
                 pg.display.flip()
                 clock.tick(60)
 
