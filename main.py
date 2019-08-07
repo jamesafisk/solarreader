@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+import os
 import sys
 import threading
 import time
@@ -12,15 +12,18 @@ import WeatherServer
 import read_solar
 from datetime import datetime
 
+os.putenv('SDL_FBDEV', '/dev/fb1')
+
 running = 1
 black = 0, 0, 0
 size = width, height = 480, 320
-screen = pg.display.set_mode(size, pg.FULLSCREEN | pg.DOUBLEBUF, 32, 0)
+screen = pg.display.set_mode(size)
 box = pg.image.load("whitebox.png")
 boxrect = box.get_rect()
+pg.mouse.set_visible(False)
 
 def main():
-
+        running=1
         mythread = WeatherServer.WeatherServer(name = "Thread-Weather getter")  # ...Instantiate a thread and pass a unique ID to it
         mythread.start()
 
@@ -40,6 +43,8 @@ def main():
                 for event in pg.event.get():
                         if event.type == pg.MOUSEBUTTONUP:
                                 None
+                        if event.type == pg.KEYDOWN:
+                                running=0
 
                 screen.fill(black)
                 if (showstatus):
@@ -47,7 +52,7 @@ def main():
 
                 elapsedTimeForStatus = time.time() - startTimeForStatus
                 elapsedTimeForTemp = time.time() - startTimeForTempUpdate
-                if (elapsedTimeForStatus > 2):
+                if (elapsedTimeForStatus > 1):
                         showstatus = not showstatus
                         startTimeForStatus = time.time()
                 if (elapsedTimeForTemp > 3600):
@@ -63,8 +68,11 @@ def main():
                 now = datetime.now()
                 timeoutput = font.render(now.strftime("%H:%M:%S"), True, (255, 255, 255), (0,0,0))
                 screen.blit(timeoutput, (330, 5))
-
                 pg.display.flip()
                 clock.tick(60)
+        
+        read_solar.close()
+        pg.quit(); 
+        sys.exit();
 
 if __name__ == '__main__':main()

@@ -47,6 +47,13 @@ HOST = ''                                 # Hostname or ip address of interface,
 PORT = 56743                              # listening on port 9999 
 
 class InverterCallBack(threading.Thread):
+    def __init__(self, name):
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)   # create socket on required port
+        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.sock.bind((HOST, PORT))
+
+    def close(self):
+        self.sock.close()
 
     def run(self):
         # inverter values found (so far) all big endian 16 bit unsigned:-
@@ -67,11 +74,8 @@ class InverterCallBack(threading.Thread):
         inverter_mth = 87                    # offset 87 & 88 total kWh for month 
         inverter_lmth = 91                    # offset 91 & 92 total kWh for last month
 
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)   # create socket on required port
-        sock.bind((HOST, PORT))
-
         while True:        # loop forever
-            sock.listen(1)                            # listen on port
+            self.sock.listen(1)                            # listen on port
             conn, addr = sock.accept()                # wait for inverter connection
             rawdata = conn.recv(1000)                # read incoming data
             hexdata = binascii.hexlify(rawdata)        # convert data to hex
