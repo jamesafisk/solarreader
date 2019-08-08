@@ -47,14 +47,8 @@ HOST = ''                                 # Hostname or ip address of interface,
 PORT = 56743                              # listening on port 9999 
 
 class InverterCallBack(threading.Thread):
-    def __init__(self, name):
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)   # create socket on required port
-        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.sock.bind((HOST, PORT))
-
-    def close(self):
-        self.sock.close()
-
+    watt_now = 0
+    
     def run(self):
         # inverter values found (so far) all big endian 16 bit unsigned:-
         header = '685951b0'                     # hex stream header
@@ -74,14 +68,19 @@ class InverterCallBack(threading.Thread):
         inverter_mth = 87                    # offset 87 & 88 total kWh for month 
         inverter_lmth = 91                    # offset 91 & 92 total kWh for last month
 
-        while True:        # loop forever
-            self.sock.listen(1)                            # listen on port
+
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)   # create socket on required port
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        sock.bind((HOST, PORT))
+
+        while True:
+            sock.listen(1)                            # listen on port
             conn, addr = sock.accept()                # wait for inverter connection
             rawdata = conn.recv(1000)                # read incoming data
             hexdata = binascii.hexlify(rawdata)        # convert data to hex
 
             if(hexdata[0:8] == header and len(hexdata) == data_size):        # check for valid data
-                watt_now = str(int(hexdata[inverter_now*2:inverter_now*2+4],16))
+                self.watt_now = str(int(hexdata[inverter_now*2:inverter_now*2+4],16))
                 # extract main values and convert to decimal
                 # generating power in watts
                 kwh_day = str(float(int(hexdata[inverter_day*2:inverter_day*2+4],16))/100)    # running total kwh for day

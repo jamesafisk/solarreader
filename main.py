@@ -28,6 +28,7 @@ def main():
         mythread.start()
 
         inverterThread = read_solar.InverterCallBack(name = "inverter comms")
+        inverterThread.daemon = True
         inverterThread.start()
 
         temp = 0
@@ -35,7 +36,7 @@ def main():
         startTimeForStatus = time.time()
         startTimeForTempUpdate = time.time()
         pg.font.init()
-        font = pg.font.SysFont("comicsansms", 32)
+        font = pg.font.SysFont("comicsansms", 64)
         clock = pg.time.Clock()
 
         # set the center of the rectangular object. 
@@ -63,16 +64,18 @@ def main():
                 stringtooutput = str(int(temp)) + u'\N{DEGREE SIGN}'
                         
                 text = font.render(stringtooutput, True, (255, 255, 255), (0,0,0)) 
-                screen.blit(text,(430,270))
+                screen.blit(text,(410,268))
+		
+		inverterWatt = font.render(str(inverterThread.watt_now), True, (255,255,255), (0,0,0))
+		screen.blit(inverterWatt, (480/2, 380/2))
                 
                 now = datetime.now()
                 timeoutput = font.render(now.strftime("%H:%M:%S"), True, (255, 255, 255), (0,0,0))
-                screen.blit(timeoutput, (330, 5))
+                screen.blit(timeoutput, (315, 5))
                 pg.display.flip()
                 clock.tick(60)
-        
-        read_solar.close()
-        pg.quit(); 
-        sys.exit();
+                
+        pg.quit()
+        sys.exit
 
 if __name__ == '__main__':main()
