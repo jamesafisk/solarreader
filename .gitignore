@@ -1,2 +1,4 @@
 __pycache__/WeatherServer.cpython-37.pyc
 __pycache__/read_solar.cpython-37.pyc
+*.pyc
+*.log

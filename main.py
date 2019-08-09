@@ -24,73 +24,75 @@ box = pg.image.load("whitebox.png")
 boxrect = box.get_rect()
 pg.mouse.set_visible(False)
 
-def init_logger(self):
-        level = logging.DEBUG
-        logging.basicConfig(format='%(asctime)s [%(levelname)s] %(message)s',level=level)
+class MainClass():
+        def init_logger(self):
+                level = logging.DEBUG
+                logging.basicConfig(format='%(asctime)s [%(levelname)s] %(message)s',level=level)
 
-        Rthandler = logging.handlers.RotatingFileHandler('solarreader.log', maxBytes=100*1024*1024,backupCount=10)
-        Rthandler.setLevel(level)
-        formatter = logging.Formatter('%(asctime)-12s [%(levelname)s] %(message)s')  
-        Rthandler.setFormatter(formatter)
-        logging.getLogger('').addHandler(Rthandler)
+                Rthandler = logging.handlers.RotatingFileHandler('solarreader.log', maxBytes=100*1024*1024,backupCount=10)
+                Rthandler.setLevel(level)
+                formatter = logging.Formatter('%(asctime)-12s [%(levelname)s] %(message)s')  
+                Rthandler.setFormatter(formatter)
+                logging.getLogger('').addHandler(Rthandler)
 
-def main(self):
-        self.init_logger()
-        logging.debug('started main')
-        running=1
-        mythread = WeatherServer.WeatherServer(name = "Thread-Weather getter")  # ...Instantiate a thread and pass a unique ID to it
-        mythread.start()
+        def mainloop(self):
+                self.init_logger(self)
+                logging.debug('started main')
+                running=1
+                mythread = WeatherServer.WeatherServer(name = "Thread-Weather getter")  # ...Instantiate a thread and pass a unique ID to it
+                mythread.start()
 
-        inverterThread = read_solar.InverterCallBack(name = "inverter comms")
-        inverterThread.daemon = True
-        inverterThread.start()
+                inverterThread = read_solar.InverterCallBack(name = "inverter comms")
+                inverterThread.daemon = True
+                inverterThread.start()
 
-        temp = 0
-        showstatus = True
-        startTimeForStatus = time.time()
-        startTimeForTempUpdate = time.time()
-        pg.font.init()
-        font = pg.font.SysFont("comicsansms", 64)
-        clock = pg.time.Clock()
+                temp = 0
+                showstatus = True
+                startTimeForStatus = time.time()
+                startTimeForTempUpdate = time.time()
+                pg.font.init()
+                font = pg.font.SysFont("comicsansms", 64)
+                clock = pg.time.Clock()
 
-        # set the center of the rectangular object. 
-        while running:
-                for event in pg.event.get():
-                        if event.type == pg.MOUSEBUTTONUP:
-                                None
-                        if event.type == pg.KEYDOWN:
-                                running=0
+                # set the center of the rectangular object. 
+                while running:
+                        for event in pg.event.get():
+                                if event.type == pg.MOUSEBUTTONUP:
+                                        None
+                                if event.type == pg.KEYDOWN:
+                                        running=0
 
-                screen.fill(black)
-                if (showstatus):
-                        screen.blit(box, boxrect)
+                        screen.fill(black)
+                        if (showstatus):
+                                screen.blit(box, boxrect)
 
-                elapsedTimeForStatus = time.time() - startTimeForStatus
-                elapsedTimeForTemp = time.time() - startTimeForTempUpdate
-                if (elapsedTimeForStatus > 1):
-                        showstatus = not showstatus
-                        startTimeForStatus = time.time()
-                if (elapsedTimeForTemp > 3600):
-                        startTimeForTempUpdate = time.time()
-                        mythread.start()
+                        elapsedTimeForStatus = time.time() - startTimeForStatus
+                        elapsedTimeForTemp = time.time() - startTimeForTempUpdate
+                        if (elapsedTimeForStatus > 1):
+                                showstatus = not showstatus
+                                startTimeForStatus = time.time()
+                        if (elapsedTimeForTemp > 3600):
+                                startTimeForTempUpdate = time.time()
+                                mythread.start()
+                                
+                        temp = mythread.temp
+                        stringtooutput = str(int(temp)) + u'\N{DEGREE SIGN}'
+                                
+                        text = font.render(stringtooutput, True, (255, 255, 255), (0,0,0)) 
+                        screen.blit(text,(410,268))
                         
-                temp = mythread.temp
-                stringtooutput = str(int(temp)) + u'\N{DEGREE SIGN}'
+                        inverterWatt = font.render(str(inverterThread.watt_now), True, (255,255,255), (0,0,0))
+                        screen.blit(inverterWatt, (480/2, 380/2))
                         
-                text = font.render(stringtooutput, True, (255, 255, 255), (0,0,0)) 
-                screen.blit(text,(410,268))
-		
-                inverterWatt = font.render(str(inverterThread.watt_now), True, (255,255,255), (0,0,0))
-                screen.blit(inverterWatt, (480/2, 380/2))
-                
-                now = datetime.now()
-                timeoutput = font.render(now.strftime("%H:%M:%S"), True, (255, 255, 255), (0,0,0))
-                screen.blit(timeoutput, (315, 5))
-                pg.display.flip()
-                clock.tick(60)
-                
-        pg.quit()
-        sys.exit
+                        now = datetime.now()
+                        timeoutput = font.render(now.strftime("%H:%M:%S"), True, (255, 255, 255), (0,0,0))
+                        screen.blit(timeoutput, (315, 5))
+                        pg.display.flip()
+                        clock.tick(60)
+                        
+                pg.quit()
+                sys.exit
 
-if __name__ == '__main__':
-        self.main()
+if __name__ == '__main__': 
+        m = MainClass
+        m.mainloop(m)

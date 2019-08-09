@@ -77,31 +77,35 @@ class InverterCallBack(threading.Thread):
         sock.bind((HOST, PORT))
 
         while True:
-            sock.listen(1)                            # listen on port
-            conn, addr = sock.accept()                # wait for inverter connection
-            rawdata = conn.recv(1000)                # read incoming data
-            hexdata = binascii.hexlify(rawdata)        # convert data to hex
+            try:
+                sock.listen(1)                            # listen on port
+                logging.debug('Got inverter info, processing....')
+                conn, addr = sock.accept()                # wait for inverter connection
+                rawdata = conn.recv(1000)                # read incoming data
+                hexdata = binascii.hexlify(rawdata)        # convert data to hex
 
-            if(hexdata[0:8] == header and len(hexdata) == data_size):        # check for valid data
-                self.watt_now = str(int(hexdata[inverter_now*2:inverter_now*2+4],16))
-                # extract main values and convert to decimal
-                # generating power in watts
-                kwh_day = str(float(int(hexdata[inverter_day*2:inverter_day*2+4],16))/100)    # running total kwh for day
-                kwh_total = str(int(hexdata[inverter_tot*2:inverter_tot*2+4],16)/10)        # running total kwh from installation
+                if(hexdata[0:8] == header and len(hexdata) == data_size):        # check for valid data
+                    self.watt_now = str(int(hexdata[inverter_now*2:inverter_now*2+4],16))
+                    # extract main values and convert to decimal
+                    # generating power in watts
+                    kwh_day = str(float(int(hexdata[inverter_day*2:inverter_day*2+4],16))/100)    # running total kwh for day
+                    kwh_total = str(int(hexdata[inverter_tot*2:inverter_tot*2+4],16)/10)        # running total kwh from installation
 
-                temp = str(float(int(hexdata[inverter_temp*2:inverter_temp*2+4],16))/10)        # temperature                                                                        # extract dc input values and convert to decimal
-                dc_volts1= str(float(int(hexdata[inverter_vdc1*2:inverter_vdc1*2+4],16))/10)    # input dc volts from chain 1
-                dc_volts2= str(float(int(hexdata[inverter_vdc2*2:inverter_vdc2*2+4],16))/10)    # input dc volts from chain 2
-                dc_amps1 = str(float(int(hexdata[inverter_adc1*2:inverter_adc1*2+4],16))/10)    # input dc amps from chain 1
-                dc_amps2 = str(float(int(hexdata[inverter_adc2*2:inverter_adc2*2+4],16))/10)    # input dc amps from chain 2
+                    temp = str(float(int(hexdata[inverter_temp*2:inverter_temp*2+4],16))/10)        # temperature                                                                        # extract dc input values and convert to decimal
+                    dc_volts1= str(float(int(hexdata[inverter_vdc1*2:inverter_vdc1*2+4],16))/10)    # input dc volts from chain 1
+                    dc_volts2= str(float(int(hexdata[inverter_vdc2*2:inverter_vdc2*2+4],16))/10)    # input dc volts from chain 2
+                    dc_amps1 = str(float(int(hexdata[inverter_adc1*2:inverter_adc1*2+4],16))/10)    # input dc amps from chain 1
+                    dc_amps2 = str(float(int(hexdata[inverter_adc2*2:inverter_adc2*2+4],16))/10)    # input dc amps from chain 2
 
-                                                                                    # extract other ac values and convert to decimal
-                ac_volts = str(float(int(hexdata[inverter_vac*2:inverter_vac*2+4],16))/10)        # output ac volts 
-                ac_amps = str(float(int(hexdata[inverter_aac*2:inverter_aac*2+4],16))/10)        # output ac amps 
-                ac_freq = str(float(int(hexdata[inverter_freq*2:inverter_freq*2+4],16))/100)    # output ac frequency hertz
+                                                                                        # extract other ac values and convert to decimal
+                    ac_volts = str(float(int(hexdata[inverter_vac*2:inverter_vac*2+4],16))/10)        # output ac volts 
+                    ac_amps = str(float(int(hexdata[inverter_aac*2:inverter_aac*2+4],16))/10)        # output ac amps 
+                    ac_freq = str(float(int(hexdata[inverter_freq*2:inverter_freq*2+4],16))/100)    # output ac frequency hertz
 
-                                                                                    # extract other historical values and convert to decimal
-                kwh_yesterday = str(float(int(hexdata[inverter_yes*2:inverter_yes*2+4],16))/100)    # yesterday's kwh
-                kwh_month = str(int(hexdata[inverter_mth*2:inverter_mth*2+4],16))                    # running total kwh for month
-                kwh_lastmonth = str(int(hexdata[inverter_lmth*2:inverter_lmth*2+4],16))                # running total kwh for last month
+                                                                                        # extract other historical values and convert to decimal
+                    kwh_yesterday = str(float(int(hexdata[inverter_yes*2:inverter_yes*2+4],16))/100)    # yesterday's kwh
+                    kwh_month = str(int(hexdata[inverter_mth*2:inverter_mth*2+4],16))                    # running total kwh for month
+                    kwh_lastmonth = str(int(hexdata[inverter_lmth*2:inverter_lmth*2+4],16))                # running total kwh for last month
+            except:
+                logging.exception('Problem getting inverter data.')
 
