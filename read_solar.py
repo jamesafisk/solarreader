@@ -41,6 +41,8 @@
  
 import socket, binascii, datetime
 import threading
+import logging
+import logging.handlers
 
 # change these values to suit your requirements:- 
 HOST = ''                                 # Hostname or ip address of interface, leave blank for all
@@ -50,6 +52,7 @@ class InverterCallBack(threading.Thread):
     watt_now = 0
     
     def run(self):
+        logging.debug('started inverter callback')
         # inverter values found (so far) all big endian 16 bit unsigned:-
         header = '685951b0'                     # hex stream header
         data_size = 206                     # hex stream size 

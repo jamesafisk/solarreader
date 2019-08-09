@@ -10,6 +10,8 @@ import socket, binascii, datetime
 import logging
 import WeatherServer
 import read_solar
+import logging
+import logging.handlers
 from datetime import datetime
 
 os.putenv('SDL_FBDEV', '/dev/fb1')
@@ -22,7 +24,19 @@ box = pg.image.load("whitebox.png")
 boxrect = box.get_rect()
 pg.mouse.set_visible(False)
 
-def main():
+def init_logger(self):
+        level = logging.DEBUG
+        logging.basicConfig(format='%(asctime)s [%(levelname)s] %(message)s',level=level)
+
+        Rthandler = logging.handlers.RotatingFileHandler('solarreader.log', maxBytes=100*1024*1024,backupCount=10)
+        Rthandler.setLevel(level)
+        formatter = logging.Formatter('%(asctime)-12s [%(levelname)s] %(message)s')  
+        Rthandler.setFormatter(formatter)
+        logging.getLogger('').addHandler(Rthandler)
+
+def main(self):
+        self.init_logger()
+        logging.debug('started main')
         running=1
         mythread = WeatherServer.WeatherServer(name = "Thread-Weather getter")  # ...Instantiate a thread and pass a unique ID to it
         mythread.start()
@@ -66,8 +80,8 @@ def main():
                 text = font.render(stringtooutput, True, (255, 255, 255), (0,0,0)) 
                 screen.blit(text,(410,268))
 		
-		inverterWatt = font.render(str(inverterThread.watt_now), True, (255,255,255), (0,0,0))
-		screen.blit(inverterWatt, (480/2, 380/2))
+                inverterWatt = font.render(str(inverterThread.watt_now), True, (255,255,255), (0,0,0))
+                screen.blit(inverterWatt, (480/2, 380/2))
                 
                 now = datetime.now()
                 timeoutput = font.render(now.strftime("%H:%M:%S"), True, (255, 255, 255), (0,0,0))
@@ -78,4 +92,5 @@ def main():
         pg.quit()
         sys.exit
 
-if __name__ == '__main__':main()
+if __name__ == '__main__':
+        self.main()
