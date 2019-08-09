@@ -25,6 +25,8 @@ boxrect = box.get_rect()
 pg.mouse.set_visible(False)
 
 class MainClass():
+        light = (255, 255, 255)
+        dark = (50, 50, 50)
         def init_logger(self):
                 level = logging.DEBUG
                 logging.basicConfig(format='%(asctime)s [%(levelname)s] %(message)s',level=level)
@@ -36,7 +38,8 @@ class MainClass():
                 logging.getLogger('').addHandler(Rthandler)
 
         def mainloop(self):
-                self.init_logger(self)
+                self.init_logger()
+                currentLight = self.light
                 logging.debug('started main')
                 running=1
                 mythread = WeatherServer.WeatherServer(name = "Thread-Weather getter")  # ...Instantiate a thread and pass a unique ID to it
@@ -48,8 +51,11 @@ class MainClass():
 
                 temp = 0
                 showstatus = True
+                
                 startTimeForStatus = time.time()
                 startTimeForTempUpdate = time.time()
+                startTimeForDarkMode = time.time()
+
                 pg.font.init()
                 font = pg.font.SysFont("comicsansms", 64)
                 clock = pg.time.Clock()
@@ -68,9 +74,18 @@ class MainClass():
 
                         elapsedTimeForStatus = time.time() - startTimeForStatus
                         elapsedTimeForTemp = time.time() - startTimeForTempUpdate
+                        startTimeForDarkMode = time.time() - startTimeForDarkMode
+                        
                         if (elapsedTimeForStatus > 1):
                                 showstatus = not showstatus
                                 startTimeForStatus = time.time()
+                        if (elapsedTimeForTemp > 3600):
+                                startTimeForTempUpdate = time.time()
+                                mythread.start()
+                        if (startTimeForDarkMode > 3600):
+                                startTimeForDarkMode = time.time()
+                                currentLight = self.dark
+
                         if (elapsedTimeForTemp > 3600):
                                 startTimeForTempUpdate = time.time()
                                 mythread.start()
@@ -78,21 +93,21 @@ class MainClass():
                         temp = mythread.temp
                         stringtooutput = str(int(temp)) + u'\N{DEGREE SIGN}'
                                 
-                        text = font.render(stringtooutput, True, (255, 255, 255), (0,0,0)) 
+                        text = font.render(stringtooutput, True, currentLight, (0,0,0)) 
                         screen.blit(text,(410,268))
                         
-                        inverterWatt = font.render(str(inverterThread.watt_now), True, (255,255,255), (0,0,0))
+                        inverterWatt = font.render(str(inverterThread.watt_now), True, currentLight, (0,0,0))
                         screen.blit(inverterWatt, (480/2, 380/2))
                         
                         now = datetime.now()
-                        timeoutput = font.render(now.strftime("%H:%M:%S"), True, (255, 255, 255), (0,0,0))
+                        timeoutput = font.render(now.strftime("%H:%M:%S"), True, currentLight, (0,0,0))
                         screen.blit(timeoutput, (315, 5))
                         pg.display.flip()
-                        clock.tick(60)
+                        clock.tick(25)
                         
                 pg.quit()
                 sys.exit
 
 if __name__ == '__main__': 
-        m = MainClass
-        m.mainloop(m)
+        m = MainClass()
+        m.mainloop()
