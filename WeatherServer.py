@@ -18,6 +18,6 @@ class WeatherServer(threading.Thread):
                 r = requests.get(url)
                 weatherData = r.json()
                 self.temp = weatherData["main"]["temp"]
-                time.sleep(60)
+                time.sleep(300) # every 5 minutes
             except:
                 logging.error("There was an error getting temp.")
