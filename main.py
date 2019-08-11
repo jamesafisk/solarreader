@@ -82,9 +82,6 @@ class MainClass():
                         if (elapsedTimeForTemp > 3600):
                                 startTimeForTempUpdate = time.time()
                                 mythread.start()
-                        if (startTimeForDarkMode > 3600):
-                                startTimeForDarkMode = time.time()
-                                currentLight = self.dark
 
                         if (elapsedTimeForTemp > 3600):
                                 startTimeForTempUpdate = time.time()
