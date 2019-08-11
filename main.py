@@ -25,8 +25,7 @@ boxrect = box.get_rect()
 pg.mouse.set_visible(False)
 
 class MainClass():
-        light = (255, 255, 255)
-        dark = (50, 50, 50)
+        light = (50, 50, 50)
         def init_logger(self):
                 level = logging.DEBUG
                 logging.basicConfig(format='%(asctime)s [%(levelname)s] %(message)s',level=level)
@@ -43,6 +42,7 @@ class MainClass():
                 logging.debug('started main')
                 running=1
                 mythread = WeatherServer.WeatherServer(name = "Thread-Weather getter")  # ...Instantiate a thread and pass a unique ID to it
+                mythread.daemon = True
                 mythread.start()
 
                 inverterThread = read_solar.InverterCallBack(name = "inverter comms")
@@ -53,8 +53,6 @@ class MainClass():
                 showstatus = True
                 
                 startTimeForStatus = time.time()
-                startTimeForTempUpdate = time.time()
-                startTimeForDarkMode = time.time()
 
                 pg.font.init()
                 font = pg.font.SysFont("comicsansms", 64)
@@ -66,6 +64,7 @@ class MainClass():
                                 if event.type == pg.MOUSEBUTTONUP:
                                         None
                                 if event.type == pg.KEYDOWN:
+                                        logging.debug('keydown detected')
                                         running=0
 
                         screen.fill(black)
@@ -73,19 +72,10 @@ class MainClass():
                                 screen.blit(box, boxrect)
 
                         elapsedTimeForStatus = time.time() - startTimeForStatus
-                        elapsedTimeForTemp = time.time() - startTimeForTempUpdate
-                        startTimeForDarkMode = time.time() - startTimeForDarkMode
                         
                         if (elapsedTimeForStatus > 1):
                                 showstatus = not showstatus
                                 startTimeForStatus = time.time()
-                        if (elapsedTimeForTemp > 3600):
-                                startTimeForTempUpdate = time.time()
-                                mythread.start()
-
-                        if (elapsedTimeForTemp > 3600):
-                                startTimeForTempUpdate = time.time()
-                                mythread.start()
                                 
                         temp = mythread.temp
                         stringtooutput = str(int(temp)) + u'\N{DEGREE SIGN}'
