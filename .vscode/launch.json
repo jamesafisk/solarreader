@@ -8,7 +8,7 @@
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
-            "pythonPath": "${config:python.pythonPath}"
+            "pythonPath": "${config:python.interpreterPath}"
         }
     ]
 }
